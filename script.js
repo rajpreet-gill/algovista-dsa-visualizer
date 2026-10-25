@@ -58,7 +58,7 @@ let currentAlgorithm = "bfs";
 let algorithmSteps = [];
 let currentStepIndex = -1;
 
-const PROTECTED_PAGES = ["visualizer", "notes"];
+const PROTECTED_PAGES = ["concepts", "visualizer", "notes"];
 
 
 // 4. HELPER FUNCTIONS
@@ -513,8 +513,6 @@ int main() {
     ]
   }
 ];
-
-
 // 6. GRAPH DATA AND ALGORITHM NOTES
 const graphNodes = [
   { id: "A", x: 70, y: 130 },
@@ -692,11 +690,31 @@ function renderTopics() {
 
   if (allTopics) {
     allTopics.innerHTML = topics.map(createTopicCard).join("");
+
+    // Explicitly handle Learn More clicks inside the Concepts topic list.
+    allTopics.onclick = event => {
+      const button = event.target.closest("button[data-topic]");
+      if (!button || !allTopics.contains(button)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      showTopic(button.dataset.topic);
+    };
   }
 
   if (featuredTopics) {
     featuredTopics.innerHTML = topics.slice(0, 4)
       .map(createTopicCard).join("");
+
+    // Explicitly handle Learn More clicks on Home featured cards.
+    featuredTopics.onclick = event => {
+      const button = event.target.closest("button[data-topic]");
+      if (!button || !featuredTopics.contains(button)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      showTopic(button.dataset.topic);
+    };
   }
 
   const noteTopic = $("noteTopic");
@@ -722,9 +740,17 @@ function renderTopics() {
 
 function showTopic(id) {
   const topic = topics.find(item => item.id === id);
-  const detail = $("topicDetail");
+  if (!topic) return;
 
-  if (!topic || !detail) return;
+  // Open Concepts first so topicDetail is visible before scrolling.
+  goToPage("concepts");
+
+  const detail = $("topicDetail");
+  if (!detail) {
+    console.error('Learn More could not find an element with id="topicDetail".');
+    showToast("Topic details section was not found. Please check index.html.", "error");
+    return;
+  }
 
   detail.innerHTML = `
     <h2>${escapeHTML(topic.title)}</h2>
@@ -754,7 +780,6 @@ function showTopic(id) {
       data-save-topic="${escapeHTML(topic.id)}">Save to My Notes</button>
   `;
 
-  // Critical: the original HTML gives this element the "hidden" class.
   detail.classList.remove("hidden");
   detail.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -1182,8 +1207,6 @@ function updateStepPanel() {
     path: step.path
   });
 }
-
-
 // 11. AUTHENTICATION MODAL
 function openAuth(mode = "login") {
   authMode = mode === "register" || mode === "signup" ? "signup" : "login";
@@ -1213,7 +1236,8 @@ function closeAuth() {
 
 function renderAuthMode() {
   if ($("authTitle")) {
-    $("authTitle").textContent = authMode === "signup" ? "Create Account" : "Welcome back";
+    $("authTitle").textContent =
+      authMode === "signup" ? "Create Account" : "Welcome back";
   }
 
   if ($("authDescription")) {
@@ -1223,7 +1247,8 @@ function renderAuthMode() {
   }
 
   if ($("authSubmitButton")) {
-    $("authSubmitButton").textContent = authMode === "signup" ? "Create account" : "Sign in";
+    $("authSubmitButton").textContent =
+      authMode === "signup" ? "Create account" : "Sign in";
   }
 
   if ($("displayNameField")) {
@@ -1231,11 +1256,13 @@ function renderAuthMode() {
   }
 
   if ($("forgotPasswordButton")) {
-    $("forgotPasswordButton").style.display = authMode === "signup" ? "none" : "";
+    $("forgotPasswordButton").style.display =
+      authMode === "signup" ? "none" : "";
   }
 
   document.querySelectorAll("[data-auth-mode]").forEach(button => {
     const mode = button.dataset.authMode;
+
     button.classList.toggle(
       "active",
       (mode === "register" || mode === "signup") === (authMode === "signup")
@@ -1263,11 +1290,19 @@ async function submitAuth(event) {
   try {
     if (authMode === "signup") {
       if (password.length < 6) {
-        setMessage("authMessage", "Password must contain at least 6 characters.", "error");
+        setMessage(
+          "authMessage",
+          "Password must contain at least 6 characters.",
+          "error"
+        );
         return;
       }
 
-      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      const credential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
       if (displayName) {
         await updateProfile(credential.user, { displayName });
@@ -1303,7 +1338,12 @@ async function resetPassword() {
 
   try {
     await sendPasswordResetEmail(auth, email);
-    setMessage("authMessage", "Password reset email sent. Check your inbox.", "success");
+
+    setMessage(
+      "authMessage",
+      "Password reset email sent. Check your inbox.",
+      "success"
+    );
   } catch (error) {
     setMessage("authMessage", friendlyError(error), "error");
   }
@@ -1338,7 +1378,7 @@ function updateAccountUI(user) {
 }
 
 
-// 12. NAVIGATION
+// 12. NAVIGATION — HOME IS PUBLIC, OTHER PAGES REQUIRE LOGIN
 function goToPage(page) {
   const normalizedPage = String(page || "").replace(/Page$/, "");
 
@@ -1346,14 +1386,20 @@ function goToPage(page) {
     return;
   }
 
+  // Protect Concepts, Visualizer, and Notes.
   if (PROTECTED_PAGES.includes(normalizedPage) && !auth.currentUser) {
     pendingProtectedPage = normalizedPage;
     openAuth("login");
-    setMessage("authMessage", "Please sign in to access this page.", "error");
+    setMessage(
+      "authMessage",
+      "Please sign in to access this page.",
+      "error"
+    );
     return;
   }
 
   const target = $(`${normalizedPage}Page`);
+
   if (!target) {
     console.error("Page element not found:", `${normalizedPage}Page`);
     return;
@@ -1368,10 +1414,15 @@ function goToPage(page) {
   target.setAttribute("aria-hidden", "false");
 
   document.querySelectorAll(".nav-btn").forEach(button => {
-    button.classList.toggle("active", button.dataset.page === normalizedPage);
+    button.classList.toggle(
+      "active",
+      button.dataset.page === normalizedPage
+    );
   });
 
-  if (normalizedPage === "notes") loadNotes();
+  if (normalizedPage === "notes") {
+    loadNotes();
+  }
 
   if (normalizedPage === "visualizer") {
     renderGraph();
@@ -1382,7 +1433,7 @@ function goToPage(page) {
 }
 
 
-// 13. PERSONAL NOTES
+// 13. PERSONAL NOTES — FIRESTORE
 function getUserNotesCollection() {
   if (!auth.currentUser) {
     throw new Error("Please sign in to access your notes.");
@@ -1398,10 +1449,12 @@ async function loadNotes() {
     let snapshot;
 
     try {
-      snapshot = await getDocs(query(
-        getUserNotesCollection(),
-        orderBy("updatedAt", "desc")
-      ));
+      snapshot = await getDocs(
+        query(
+          getUserNotesCollection(),
+          orderBy("updatedAt", "desc")
+        )
+      );
     } catch {
       snapshot = await getDocs(getUserNotesCollection());
     }
@@ -1419,44 +1472,77 @@ async function loadNotes() {
 
 function renderNotes() {
   const container = $("notesList");
-  if ($("notesCount")) $("notesCount").textContent = String(notesCache.length);
+
+  if ($("notesCount")) {
+    $("notesCount").textContent = String(notesCache.length);
+  }
+
   if (!container) return;
 
   if (!auth.currentUser) {
-    container.innerHTML = "<p>Please sign in to view your notes.</p>";
+    container.innerHTML = `
+      <div class="empty-state">
+        Please sign in to view your notes.
+      </div>
+    `;
     return;
   }
 
   if (!notesCache.length) {
     container.innerHTML = `
-      <div class="empty-notes">
+      <div class="empty-state">
         <h3>No notes yet</h3>
         <p>Create your first personal DSA note.</p>
-      </div>`;
+      </div>
+    `;
     return;
   }
 
   container.innerHTML = notesCache.map(note => `
     <article class="note-item">
-      <h3>${escapeHTML(note.title || "Untitled note")}</h3>
-      <span class="note-topic">${escapeHTML(note.topic || "General")}</span>
-      <p>${escapeHTML(note.content || "")}</p>
-      <div class="note-actions">
-        <button type="button" class="btn secondary"
-          data-edit-note="${escapeHTML(note.id)}">Edit</button>
-        <button type="button" class="btn secondary"
-          data-delete-note="${escapeHTML(note.id)}">Delete</button>
+      <div class="note-item-head">
+        <div>
+          <h3>${escapeHTML(note.title || "Untitled note")}</h3>
+          <span class="note-meta">
+            ${escapeHTML(note.topic || "General")}
+          </span>
+        </div>
+
+        <div class="note-actions">
+          <button
+            type="button"
+            class="mini-button"
+            data-edit-note="${escapeHTML(note.id)}">
+            Edit
+          </button>
+
+          <button
+            type="button"
+            class="mini-button delete"
+            data-delete-note="${escapeHTML(note.id)}">
+            Delete
+          </button>
+        </div>
       </div>
+
+      <p class="note-content">${escapeHTML(note.content || "")}</p>
     </article>
   `).join("");
 }
 
 function resetNoteForm() {
   editingNoteId = null;
+
   $("noteForm")?.reset();
 
-  if ($("noteId")) $("noteId").value = "";
-  if ($("noteFormTitle")) $("noteFormTitle").textContent = "Create a note";
+  if ($("noteId")) {
+    $("noteId").value = "";
+  }
+
+  if ($("noteFormTitle")) {
+    $("noteFormTitle").textContent = "Create a note";
+  }
+
   setMessage("notesMessage", "");
 }
 
@@ -1466,7 +1552,12 @@ async function saveNote(event) {
   if (!auth.currentUser) {
     pendingProtectedPage = "notes";
     openAuth("login");
-    setMessage("authMessage", "Sign in before saving notes.", "error");
+
+    setMessage(
+      "authMessage",
+      "Sign in before saving notes.",
+      "error"
+    );
     return;
   }
 
@@ -1475,7 +1566,11 @@ async function saveNote(event) {
   const content = $("noteContent")?.value.trim();
 
   if (!title || !content) {
-    setMessage("notesMessage", "Enter a title and note content.", "error");
+    setMessage(
+      "notesMessage",
+      "Enter a title and note content.",
+      "error"
+    );
     return;
   }
 
@@ -1489,15 +1584,23 @@ async function saveNote(event) {
 
     if (editingNoteId) {
       await updateDoc(
-        doc(db, "users", auth.currentUser.uid, "notes", editingNoteId),
+        doc(
+          db,
+          "users",
+          auth.currentUser.uid,
+          "notes",
+          editingNoteId
+        ),
         data
       );
+
       showToast("Note updated.", "success");
     } else {
       await addDoc(getUserNotesCollection(), {
         ...data,
         createdAt: serverTimestamp()
       });
+
       showToast("Note saved.", "success");
     }
 
@@ -1516,13 +1619,19 @@ function editNote(id) {
 
   editingNoteId = id;
 
-  $("noteId").value = id;
-  $("noteTitle").value = note.title || "";
-  $("noteTopic").value = note.topic || "General";
-  $("noteContent").value = note.content || "";
-  $("noteFormTitle").textContent = "Edit note";
+  if ($("noteId")) $("noteId").value = id;
+  if ($("noteTitle")) $("noteTitle").value = note.title || "";
+  if ($("noteTopic")) $("noteTopic").value = note.topic || "General";
+  if ($("noteContent")) $("noteContent").value = note.content || "";
 
-  $("noteForm")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  if ($("noteFormTitle")) {
+    $("noteFormTitle").textContent = "Edit note";
+  }
+
+  $("noteForm")?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 }
 
 async function deleteNote(id) {
@@ -1531,10 +1640,15 @@ async function deleteNote(id) {
   const note = notesCache.find(item => item.id === id);
   if (!note) return;
 
-  if (!confirm(`Delete "${note.title || "this note"}"?`)) return;
+  if (!confirm(`Delete "${note.title || "this note"}"?`)) {
+    return;
+  }
 
   try {
-    await deleteDoc(doc(db, "users", auth.currentUser.uid, "notes", id));
+    await deleteDoc(
+      doc(db, "users", auth.currentUser.uid, "notes", id)
+    );
+
     showToast("Note deleted.", "success");
     await loadNotes();
   } catch (error) {
@@ -1546,7 +1660,12 @@ function prepareTopicNote(topicId) {
   if (!auth.currentUser) {
     pendingProtectedPage = "notes";
     openAuth("login");
-    setMessage("authMessage", "Sign in to save personal notes.", "error");
+
+    setMessage(
+      "authMessage",
+      "Sign in to save personal notes.",
+      "error"
+    );
     return;
   }
 
@@ -1556,21 +1675,35 @@ function prepareTopicNote(topicId) {
   goToPage("notes");
   resetNoteForm();
 
-  $("noteTitle").value = topic.title;
-  $("noteTopic").value = topic.title;
-  $("noteContent").value =
-    `${topic.definition}\n\nHow it works:\n${topic.working}\n\n` +
-    `Steps:\n${topic.steps.map((step, i) => `${i + 1}. ${step}`).join("\n")}\n\n` +
-    `Example:\n${topic.example}\n\nTime Complexity: ${topic.time}\n` +
-    `Space Complexity: ${topic.space}\n\nC++ Code:\n${topic.code}\n\n` +
-    `Practice Questions:\n${topic.questions.map((q, i) => `${i + 1}. ${q}`).join("\n")}`;
+  if ($("noteTitle")) $("noteTitle").value = topic.title;
+  if ($("noteTopic")) $("noteTopic").value = topic.title;
+
+  if ($("noteContent")) {
+    $("noteContent").value =
+      `${topic.definition}\n\nHow it works:\n${topic.working}\n\n` +
+      `Steps:\n${topic.steps.map(
+        (step, i) => `${i + 1}. ${step}`
+      ).join("\n")}\n\n` +
+      `Example:\n${topic.example}\n\n` +
+      `Time Complexity: ${topic.time}\n` +
+      `Space Complexity: ${topic.space}\n\n` +
+      `C++ Code:\n${topic.code}\n\n` +
+      `Practice Questions:\n${topic.questions.map(
+        (question, i) => `${i + 1}. ${question}`
+      ).join("\n")}`;
+  }
 }
 
 function prepareAlgorithmNote(id) {
   if (!auth.currentUser) {
     pendingProtectedPage = "notes";
     openAuth("login");
-    setMessage("authMessage", "Sign in to save personal notes.", "error");
+
+    setMessage(
+      "authMessage",
+      "Sign in to save personal notes.",
+      "error"
+    );
     return;
   }
 
@@ -1580,18 +1713,28 @@ function prepareAlgorithmNote(id) {
   goToPage("notes");
   resetNoteForm();
 
-  $("noteTitle").value = item.title;
-  $("noteTopic").value = "Graph Algorithms";
-  $("noteContent").value =
-    `${item.definition}\n\nSteps:\n${item.steps.map((s, i) => `${i + 1}. ${s}`).join("\n")}\n\n` +
-    `Example:\n${item.example}\n\nTime Complexity: ${item.complexity}\n` +
-    `Space Complexity: ${item.space}\n\nImportant: ${item.tip}\n\nC++ Code:\n${item.code}`;
+  if ($("noteTitle")) $("noteTitle").value = item.title;
+  if ($("noteTopic")) $("noteTopic").value = "Graph Algorithms";
+
+  if ($("noteContent")) {
+    $("noteContent").value =
+      `${item.definition}\n\n` +
+      `Steps:\n${item.steps.map(
+        (step, i) => `${i + 1}. ${step}`
+      ).join("\n")}\n\n` +
+      `Example:\n${item.example}\n\n` +
+      `Time Complexity: ${item.complexity}\n` +
+      `Space Complexity: ${item.space}\n\n` +
+      `Important: ${item.tip}\n\n` +
+      `C++ Code:\n${item.code}`;
+  }
 }
 
 
 // 14. EVENT LISTENERS
 document.addEventListener("click", event => {
   const pageButton = event.target.closest("[data-page]");
+
   if (pageButton) {
     event.preventDefault();
     goToPage(pageButton.dataset.page);
@@ -1599,36 +1742,42 @@ document.addEventListener("click", event => {
   }
 
   const topicButton = event.target.closest("[data-topic]");
+
   if (topicButton) {
     showTopic(topicButton.dataset.topic);
     return;
   }
 
   const saveTopicButton = event.target.closest("[data-save-topic]");
+
   if (saveTopicButton) {
     prepareTopicNote(saveTopicButton.dataset.saveTopic);
     return;
   }
 
   const saveAlgorithmButton = event.target.closest("[data-save-algorithm]");
+
   if (saveAlgorithmButton) {
     prepareAlgorithmNote(saveAlgorithmButton.dataset.saveAlgorithm);
     return;
   }
 
   const editButton = event.target.closest("[data-edit-note]");
+
   if (editButton) {
     editNote(editButton.dataset.editNote);
     return;
   }
 
   const deleteButton = event.target.closest("[data-delete-note]");
+
   if (deleteButton) {
     deleteNote(deleteButton.dataset.deleteNote);
     return;
   }
 
   const authModeButton = event.target.closest("[data-auth-mode]");
+
   if (authModeButton) {
     event.preventDefault();
     openAuth(authModeButton.dataset.authMode);
@@ -1645,8 +1794,10 @@ document.addEventListener("click", event => {
     return;
   }
 
-  if (event.target.closest("#closeAuthButton") ||
-      event.target.closest("[data-close-modal]")) {
+  if (
+    event.target.closest("#closeAuthButton") ||
+    event.target.closest("[data-close-modal]")
+  ) {
     closeAuth();
     return;
   }
@@ -1679,11 +1830,15 @@ $("topicSearch")?.addEventListener("input", event => {
 });
 
 $("authModal")?.addEventListener("click", event => {
-  if (event.target.id === "authModal") closeAuth();
+  if (event.target.id === "authModal") {
+    closeAuth();
+  }
 });
 
 document.addEventListener("keydown", event => {
-  if (event.key === "Escape") closeAuth();
+  if (event.key === "Escape") {
+    closeAuth();
+  }
 });
 
 
@@ -1696,6 +1851,7 @@ onAuthStateChanged(auth, async user => {
     if (pendingProtectedPage) {
       const destination = pendingProtectedPage;
       pendingProtectedPage = null;
+
       closeAuth();
       goToPage(destination);
     } else if ($("notesPage")?.classList.contains("active")) {
@@ -1714,7 +1870,56 @@ onAuthStateChanged(auth, async user => {
 });
 
 
-// 16. START APPLICATION
+// 16. DARK / LIGHT THEME
+function applyTheme(theme) {
+  const selectedTheme = theme === "dark" ? "dark" : "light";
+
+  document.body.dataset.theme = selectedTheme;
+
+  const themeButton = $("themeToggle");
+
+  if (themeButton) {
+    const darkMode = selectedTheme === "dark";
+
+    themeButton.textContent = darkMode ? "☀️ Light" : "🌙 Dark";
+
+    themeButton.setAttribute(
+      "aria-label",
+      darkMode ? "Switch to light mode" : "Switch to dark mode"
+    );
+
+    themeButton.title = darkMode
+      ? "Switch to light mode"
+      : "Switch to dark mode";
+  }
+
+  try {
+    localStorage.setItem("algovista_theme", selectedTheme);
+  } catch (error) {
+    console.warn("Could not save theme preference.", error);
+  }
+}
+
+function initializeTheme() {
+  let savedTheme = "light";
+
+  try {
+    savedTheme = localStorage.getItem("algovista_theme") || "light";
+  } catch (error) {
+    console.warn("Could not read theme preference.", error);
+  }
+
+  applyTheme(savedTheme);
+
+  $("themeToggle")?.addEventListener("click", () => {
+    const currentTheme = document.body.dataset.theme || "light";
+
+    applyTheme(currentTheme === "dark" ? "light" : "dark");
+  });
+}
+
+
+// 17. START APPLICATION
 function startAlgoVista() {
   renderTopics();
   populateNodeSelectors();
@@ -1722,10 +1927,11 @@ function startAlgoVista() {
   renderAlgorithmGuide();
   resetAlgorithm();
 
-  // Make the correct page visible initially.
+  // Always show the public Home page on initial startup.
   goToPage("home");
 
   console.log("AlgoVista initialized successfully.");
 }
 
+initializeTheme();
 startAlgoVista();

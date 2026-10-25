@@ -1350,7 +1350,10 @@ main {
   }
 }
 
-/* DARK / LIGHT MODE */
+
+/* ==========================================
+   ALGOVISTA DARK / LIGHT MODE
+   ========================================== */
 
 .theme-toggle {
   white-space: nowrap;
@@ -1363,158 +1366,506 @@ body,
 .detail-card,
 .panel,
 .modal-card,
+.note-item,
+.feature-card,
+.toolbar,
 input,
 select,
 textarea,
 button {
-  transition: background-color 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+  transition:
+    background-color 0.22s ease,
+    color 0.22s ease,
+    border-color 0.22s ease;
 }
+
+/* ==========================================
+   DARK MODE BASE
+   ========================================== */
 
 body[data-theme="dark"] {
   --blue: #60a5fa;
   --blue-dark: #3b82f6;
   --blue-light: #1e293b;
-  --ink: #e5e7eb;
-  --muted: #a1aabe;
+  --ink: #f1f5f9;
+  --muted: #cbd5e1;
   --line: #334155;
   --bg: #0b1120;
   --green: #34d399;
   --shadow: 0 12px 34px rgba(0, 0, 0, 0.25);
-  background: var(--bg);
-  color: var(--ink);
+
+  background-color: #0b1120 !important;
+  color: #f1f5f9 !important;
 }
+
+/* ==========================================
+   HEADER AND FOOTER
+   ========================================== */
 
 body[data-theme="dark"] .topbar,
 body[data-theme="dark"] .footer {
-  background: #111827;
-  color: #e5e7eb;
-  border-color: #334155;
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
 }
 
 body[data-theme="dark"] .brand {
-  color: #f1f5f9;
+  color: #f8fafc !important;
+}
+
+body[data-theme="dark"] #userLabel {
+  color: #cbd5e1 !important;
 }
 
 body[data-theme="dark"] .nav-btn {
-  color: #cbd5e1;
+  color: #cbd5e1 !important;
 }
 
 body[data-theme="dark"] .nav-btn:hover,
 body[data-theme="dark"] .nav-btn.active {
-  background: #1e3a5f;
-  color: #93c5fd;
+  background-color: #1e3a5f !important;
+  color: #bfdbfe !important;
 }
 
-body[data-theme="dark"] .hero,
-body[data-theme="dark"] .feature-card,
-body[data-theme="dark"] .topic-card,
-body[data-theme="dark"] .detail-card,
-body[data-theme="dark"] .note-card,
-body[data-theme="dark"] .panel,
-body[data-theme="dark"] .modal-card,
-body[data-theme="dark"] .stat-card,
-body[data-theme="dark"] .visualizer-card,
-body[data-theme="dark"] .algorithm-panel {
-  background: #111827;
-  color: #e5e7eb;
-  border-color: #334155;
-  box-shadow: var(--shadow);
-}
+/* ==========================================
+   GENERAL TEXT
+   ========================================== */
 
 body[data-theme="dark"] h1,
 body[data-theme="dark"] h2,
 body[data-theme="dark"] h3,
 body[data-theme="dark"] h4,
+body[data-theme="dark"] h5,
 body[data-theme="dark"] strong,
 body[data-theme="dark"] label {
-  color: #f1f5f9;
+  color: #f8fafc;
 }
 
 body[data-theme="dark"] p,
 body[data-theme="dark"] li,
 body[data-theme="dark"] .muted,
-body[data-theme="dark"] .eyebrow {
+body[data-theme="dark"] .eyebrow,
+body[data-theme="dark"] .message,
+body[data-theme="dark"] .stats span {
   color: #cbd5e1;
+}
+
+body[data-theme="dark"] .text-link {
+  color: #93c5fd !important;
+}
+
+/* ==========================================
+   TOPIC CARDS AND LEARNING PATH
+   ========================================== */
+
+body[data-theme="dark"] .topic-card,
+body[data-theme="dark"] .feature-card,
+body[data-theme="dark"] .detail-card,
+body[data-theme="dark"] .stat-card,
+body[data-theme="dark"] .visualizer-card,
+body[data-theme="dark"] .algorithm-panel {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+body[data-theme="dark"] .topic-card h3,
+body[data-theme="dark"] .feature-card h3 {
+  color: #f8fafc !important;
+}
+
+body[data-theme="dark"] .topic-card p,
+body[data-theme="dark"] .feature-card p {
+  color: #cbd5e1 !important;
+}
+
+/* Beginner and difficulty badges */
+body[data-theme="dark"] .topic-level {
+  background-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+body[data-theme="dark"] .topic-category {
+  background-color: #1e3a5f !important;
+  color: #bfdbfe !important;
+}
+
+/* ==========================================
+   BUTTONS
+   ========================================== */
+
+body[data-theme="dark"] .btn.secondary,
+body[data-theme="dark"] .theme-toggle {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+body[data-theme="dark"] .btn.secondary:hover {
+  background-color: #334155 !important;
+}
+
+body[data-theme="dark"] .btn.primary {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+body[data-theme="dark"] .topic-card button {
+  color: #93c5fd !important;
+}
+
+/* ==========================================
+   INPUTS AND TOOLBAR
+   ========================================== */
+
+body[data-theme="dark"] .toolbar {
+  background-color: #111827 !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+body[data-theme="dark"] .toolbar label,
+body[data-theme="dark"] .note-form label,
+body[data-theme="dark"] .modal-card label {
+  color: #e2e8f0 !important;
 }
 
 body[data-theme="dark"] input,
 body[data-theme="dark"] select,
-body[data-theme="dark"] textarea {
-  background: #0f172a;
-  color: #e5e7eb;
-  border-color: #475569;
+body[data-theme="dark"] textarea,
+body[data-theme="dark"] .search-input,
+body[data-theme="dark"] .toolbar select,
+body[data-theme="dark"] .note-form input,
+body[data-theme="dark"] .note-form select,
+body[data-theme="dark"] .note-form textarea,
+body[data-theme="dark"] .modal-card input {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
 }
 
 body[data-theme="dark"] input::placeholder,
 body[data-theme="dark"] textarea::placeholder {
-  color: #94a3b8;
+  color: #94a3b8 !important;
 }
 
 body[data-theme="dark"] select option {
-  background: #0f172a;
-  color: #e5e7eb;
-}
-
-body[data-theme="dark"] .btn.secondary,
-body[data-theme="dark"] .theme-toggle {
-  background: #1e293b;
+  background-color: #0f172a;
   color: #f8fafc;
-  border-color: #475569;
 }
 
-body[data-theme="dark"] .btn.secondary:hover {
-  background: #334155;
+/* ==========================================
+   GRAPH VISUALIZER
+   ========================================== */
+
+body[data-theme="dark"] .panel {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
 }
 
-body[data-theme="dark"] pre,
-body[data-theme="dark"] .code-example {
-  background: #020617;
-  color: #dbeafe;
-  border-color: #334155;
-  overflow-x: auto;
-}
-
-body[data-theme="dark"] .topic-category {
-  background: #1e3a5f;
-  color: #93c5fd;
-}
-
-body[data-theme="dark"] .topic-level {
-  background: #334155;
+body[data-theme="dark"] .panel h2,
+body[data-theme="dark"] .panel h3 {
   color: #f8fafc !important;
 }
 
+body[data-theme="dark"] .panel-heading p {
+  color: #cbd5e1 !important;
+}
+
+body[data-theme="dark"] .graph-canvas,
+body[data-theme="dark"] .graph-container,
+body[data-theme="dark"] #graphCanvas,
+body[data-theme="dark"] .visualizer-panel {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+/* Graph nodes */
+body[data-theme="dark"] .graph-node {
+  fill: #1e293b;
+  stroke: #94a3b8;
+}
+
+body[data-theme="dark"] .graph-node.current {
+  fill: #1d4ed8;
+  stroke: #60a5fa;
+}
+
+body[data-theme="dark"] .graph-node.visited {
+  fill: #065f46;
+  stroke: #34d399;
+}
+
+body[data-theme="dark"] .graph-node.path-node {
+  fill: #78350f;
+  stroke: #fbbf24;
+}
+
+body[data-theme="dark"] .node-label {
+  fill: #ffffff !important;
+}
+
+/* Edges and weights */
+body[data-theme="dark"] .graph-edge {
+  stroke: #94a3b8;
+}
+
+body[data-theme="dark"] .graph-edge.active-edge {
+  stroke: #60a5fa;
+}
+
+body[data-theme="dark"] .edge-weight {
+  fill: #f8fafc !important;
+  stroke: #111827;
+}
+
+/* Graph legend */
+body[data-theme="dark"] .legend {
+  color: #e2e8f0 !important;
+}
+
+body[data-theme="dark"] .dot {
+  background-color: #1e293b;
+  border-color: #94a3b8;
+}
+
+/* ==========================================
+   EXECUTION STEPS
+   ========================================== */
+
+body[data-theme="dark"] .explanation {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+body[data-theme="dark"] .step-list {
+  background-color: transparent;
+}
+
+body[data-theme="dark"] .step-item {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #475569 !important;
+}
+
+body[data-theme="dark"] .step-item.active {
+  background-color: #1e3a5f !important;
+  color: #ffffff !important;
+  border-color: #60a5fa !important;
+}
+
+body[data-theme="dark"] .step-number {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+}
+
+/* ==========================================
+   ALGORITHM STATE AND DISTANCE TABLES
+   ========================================== */
+
+body[data-theme="dark"] .state-row {
+  border-color: #475569 !important;
+}
+
+body[data-theme="dark"] .state-row span {
+  color: #cbd5e1 !important;
+}
+
+body[data-theme="dark"] .state-row strong {
+  color: #ffffff !important;
+}
+
+body[data-theme="dark"] .complexity-table,
+body[data-theme="dark"] .distance-table {
+  color: #f1f5f9 !important;
+}
+
+body[data-theme="dark"] .complexity-table th,
+body[data-theme="dark"] .complexity-table td,
+body[data-theme="dark"] .distance-table th,
+body[data-theme="dark"] .distance-table td {
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+body[data-theme="dark"] .complexity-table th,
+body[data-theme="dark"] .distance-table th {
+  background-color: #1e293b !important;
+}
+
+body[data-theme="dark"] .distance-table tr.settled td {
+  color: #6ee7b7 !important;
+}
+
+body[data-theme="dark"] .path-result {
+  background-color: #064e3b !important;
+  color: #d1fae5 !important;
+}
+
+/* ==========================================
+   SAVED NOTES
+   ========================================== */
+
+body[data-theme="dark"] .notes-layout .panel,
+body[data-theme="dark"] .note-item {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+body[data-theme="dark"] .notes-title h2,
+body[data-theme="dark"] .note-item h3 {
+  color: #f8fafc !important;
+}
+
+body[data-theme="dark"] .note-meta {
+  color: #cbd5e1 !important;
+}
+
+body[data-theme="dark"] .note-content {
+  color: #e2e8f0 !important;
+}
+
+body[data-theme="dark"] .mini-button {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+
+body[data-theme="dark"] .mini-button.delete {
+  color: #fca5a5 !important;
+}
+
+body[data-theme="dark"] .empty-state {
+  background-color: #111827 !important;
+  color: #cbd5e1 !important;
+  border-color: #475569 !important;
+}
+
+body[data-theme="dark"] .count-badge {
+  background-color: #1e3a5f !important;
+  color: #bfdbfe !important;
+}
+
+/* ==========================================
+   DETAIL SECTIONS AND CODE
+   ========================================== */
+
+body[data-theme="dark"] .detail-header {
+  border-color: #334155 !important;
+}
+
+body[data-theme="dark"] .detail-header p,
+body[data-theme="dark"] .detail-section p,
+body[data-theme="dark"] .detail-section li,
+body[data-theme="dark"] .bottom-grid p,
+body[data-theme="dark"] .bottom-grid li {
+  color: #cbd5e1 !important;
+}
+
+body[data-theme="dark"] .example-box,
+body[data-theme="dark"] .info-box {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+body[data-theme="dark"] .code-block,
+body[data-theme="dark"] pre,
+body[data-theme="dark"] .code-example {
+  background-color: #020617 !important;
+  color: #dbeafe !important;
+  border-color: #334155 !important;
+}
+
+body[data-theme="dark"] .code-label {
+  color: #93c5fd !important;
+}
+
+body[data-theme="dark"] .edge-chip {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #475569 !important;
+}
+
+/* ==========================================
+   AUTHENTICATION MODAL
+   ========================================== */
+
+body[data-theme="dark"] .modal-card {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+body[data-theme="dark"] .modal-card h2 {
+  color: #f8fafc !important;
+}
+
+body[data-theme="dark"] .modal-close {
+  color: #cbd5e1 !important;
+}
+
+body[data-theme="dark"] .auth-tabs {
+  background-color: #1e293b !important;
+}
+
+body[data-theme="dark"] .auth-tab {
+  color: #cbd5e1 !important;
+}
+
+body[data-theme="dark"] .auth-tab.active {
+  background-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================
+   BADGES AND NOTIFICATIONS
+   ========================================== */
+
 body[data-theme="dark"] .badge {
-  background: #064e3b;
+  background-color: #064e3b !important;
   color: #a7f3d0 !important;
 }
 
-body[data-theme="dark"] .graph-container,
-body[data-theme="dark"] .graph-canvas,
-body[data-theme="dark"] #graphCanvas,
-body[data-theme="dark"] .visualizer-panel {
-  background: #111827;
-  color: #e5e7eb;
-  border-color: #334155;
+body[data-theme="dark"] .toast {
+  background-color: #1e293b;
+  color: #ffffff !important;
+  border: 1px solid #475569;
 }
 
-body[data-theme="dark"] table,
-body[data-theme="dark"] th,
-body[data-theme="dark"] td {
-  color: #e5e7eb;
-  border-color: #334155;
+body[data-theme="dark"] .toast.error {
+  background-color: #991b1b !important;
+  color: #ffffff !important;
 }
 
-body[data-theme="dark"] th {
-  background: #1e293b;
-}
-
-body[data-theme="dark"] hr {
-  border-color: #334155;
-}
+/* ==========================================
+   LINKS AND MISCELLANEOUS
+   ========================================== */
 
 body[data-theme="dark"] a:not(.brand) {
   color: #93c5fd;
 }
 
-/* END OF DARK / LIGHT MODE */
+body[data-theme="dark"] hr {
+  border-color: #334155 !important;
+}
+
+body[data-theme="dark"] .line-key {
+  background-color: #cbd5e1;
+}
+
+/* ==========================================
+   LIGHT MODE BADGES
+   ========================================== */
+
+body:not([data-theme="dark"]) .topic-level {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+/* END DARK / LIGHT MODE */

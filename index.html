@@ -1,0 +1,628 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ffffff">
+  <title>AlgoVista | DSA Visualizer</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Password field layout */
+    .modal-card .password-wrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 8px;
+      width: 100%;
+      margin: 8px 0 18px;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    .modal-card .password-wrapper #passwordInput {
+      display: block;
+      flex: 1 1 0;
+      width: 0;
+      min-width: 0;
+      max-width: 100%;
+      height: 48px;
+      margin: 0;
+      padding: 0 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    .modal-card .password-wrapper #passwordToggle {
+      display: inline-flex;
+      flex: 0 0 48px;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      min-width: 48px;
+      height: 48px;
+      margin: 0;
+      padding: 0;
+      position: relative;
+      transform: none;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #334155;
+      cursor: pointer;
+      box-sizing: border-box;
+      opacity: 1;
+      visibility: visible;
+      z-index: 5;
+    }
+
+    .modal-card .password-wrapper #passwordToggle:hover {
+      background: #f1f5f9;
+    }
+
+    .modal-card .password-wrapper #passwordToggle:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+    }
+
+    .modal-card .password-wrapper #passwordToggle svg {
+      display: block;
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+    }
+
+    body[data-theme="dark"] .modal-card .password-wrapper #passwordInput {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-color: #475569;
+    }
+
+    body[data-theme="dark"] .modal-card .password-wrapper #passwordToggle {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-color: #475569;
+    }
+
+    body[data-theme="dark"] .modal-card .password-wrapper #passwordToggle:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <a href="#" class="brand" data-page="home">
+    <span class="brand-icon">A</span>
+    <span>Algo<span class="blue">Vista</span></span>
+  </a>
+
+  <nav>
+    <button type="button" data-page="home" class="nav-btn active">Home</button>
+    <button type="button" data-page="concepts" class="nav-btn">Concepts</button>
+    <button type="button" data-page="visualizer" class="nav-btn">Visualizer</button>
+    <button type="button" data-page="notes" class="nav-btn">My Notes</button>
+  </nav>
+
+  <div class="account">
+    <span id="userLabel">Guest mode</span>
+
+    <button
+      id="themeToggle"
+      class="btn secondary theme-toggle"
+      type="button"
+      aria-label="Switch to dark mode"
+      title="Switch theme"
+    >🌙 Dark</button>
+
+    <button id="authButton" class="btn primary" type="button">
+      Sign in
+    </button>
+
+    <button id="logoutButton" class="btn secondary hidden" type="button">
+      Sign out
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- HOME -->
+  <section id="homePage" class="page active">
+
+    <div class="hero">
+      <div class="hero-content">
+        <span class="eyebrow">YOUR INTERACTIVE DSA CLASSROOM</span>
+
+        <h1>
+          Learn algorithms.<br>
+          <span class="blue">Understand every step.</span>
+        </h1>
+
+        <p>
+          Study Data Structures and Algorithms with detailed notes,
+          C++ examples, complexity analysis and interactive visualizations.
+        </p>
+
+        <div class="hero-buttons">
+          <button type="button" class="btn primary" data-page="concepts">
+            Start learning →
+          </button>
+
+          <button type="button" class="btn secondary" data-page="visualizer">
+            Explore visualizer
+          </button>
+        </div>
+
+        <div class="stats">
+          <div><strong>10+</strong><span>DSA topics</span></div>
+          <div><strong>3</strong><span>Graph algorithms</span></div>
+          <div><strong>C++</strong><span>Code examples</span></div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="orbit"></div>
+        <div class="orbit orbit-two"></div>
+
+        <div class="floating-card card-one">BFS</div>
+        <div class="floating-card card-two">DFS</div>
+        <div class="floating-card card-three">Dijkstra</div>
+
+        <div class="visual-center">
+          <span>⌘</span>
+          <strong>AlgoVista</strong>
+          <small>DSA VISUAL LAB</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">LEARNING PATH</span>
+        <h2>Start with a topic</h2>
+      </div>
+
+      <button type="button" class="text-link" data-page="concepts">
+        All topics →
+      </button>
+    </div>
+
+    <div id="featuredTopics" class="topic-grid"></div>
+
+    <div class="feature-grid">
+      <article class="feature-card">
+        <div class="feature-icon">▤</div>
+        <h3>Detailed study notes</h3>
+        <p>
+          Definitions, algorithm steps, worked examples, C++ code
+          and time complexity.
+        </p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">◉</div>
+        <h3>Interactive visualizations</h3>
+        <p>
+          Follow BFS, DFS and Dijkstra step by step and understand how they work.
+        </p>
+      </article>
+
+      <article class="feature-card">
+        <div class="feature-icon">✎</div>
+        <h3>Personal notes</h3>
+        <p>Save, edit and delete your own notes using your account.</p>
+      </article>
+    </div>
+
+  </section>
+
+  <!-- CONCEPTS -->
+  <section id="conceptsPage" class="page">
+
+    <div class="page-heading">
+      <div>
+        <span class="eyebrow">DSA KNOWLEDGE BASE</span>
+        <h1>Concepts &amp; Algorithms</h1>
+        <p>
+          Study the concept, understand the algorithm, then practise the code.
+        </p>
+      </div>
+
+      <input
+        id="topicSearch"
+        class="search-input"
+        type="search"
+        placeholder="Search topics..."
+        aria-label="Search DSA topics"
+      >
+    </div>
+
+    <div id="allTopics" class="topic-grid"></div>
+    <article id="topicDetail" class="detail-card hidden"></article>
+
+  </section>
+
+  <!-- VISUALIZER -->
+  <section id="visualizerPage" class="page">
+
+    <div class="page-heading">
+      <div>
+        <span class="eyebrow">INTERACTIVE ALGORITHM LAB</span>
+        <h1>Graph Visualizer</h1>
+        <p>
+          Run an algorithm and inspect its execution one step at a time.
+        </p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+
+      <label>
+        Algorithm
+        <select id="algorithmSelect">
+          <option value="bfs">BFS — Breadth-First Search</option>
+          <option value="dfs">DFS — Depth-First Search</option>
+          <option value="dijkstra">Dijkstra — Shortest Path</option>
+        </select>
+      </label>
+
+      <label>
+        Start node
+        <select id="startNodeSelect"></select>
+      </label>
+
+      <label id="targetField">
+        Target node
+        <select id="targetNodeSelect"></select>
+      </label>
+
+      <div class="toolbar-buttons">
+        <button id="runButton" class="btn primary" type="button">▶ Run</button>
+        <button id="nextButton" class="btn secondary" type="button">Next step →</button>
+        <button id="resetButton" class="btn secondary" type="button">↺ Reset</button>
+      </div>
+    </div>
+
+    <div class="visualizer-grid">
+
+      <article class="panel graph-panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Graph canvas</h2>
+            <p>Sample weighted, undirected graph</p>
+          </div>
+          <span class="badge">INTERACTIVE</span>
+        </div>
+
+        <div class="graph-canvas">
+          <svg
+            id="graphSvg"
+            viewBox="0 0 650 370"
+            role="img"
+            aria-label="Graph algorithm visualization"
+          ></svg>
+        </div>
+
+        <div class="legend">
+          <span><i class="dot"></i> Unvisited</span>
+          <span><i class="dot current-dot"></i> Current</span>
+          <span><i class="dot visited-dot"></i> Visited</span>
+          <span><i class="line-key"></i> Edge weight</span>
+        </div>
+      </article>
+
+      <div class="side-panels">
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Execution steps</h2>
+              <p id="stepCounter">Ready to start</p>
+            </div>
+          </div>
+
+          <div id="stepExplanation" class="explanation">
+            Press Run to generate the steps.
+          </div>
+
+          <div id="stepList" class="step-list"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <h2>Algorithm state</h2>
+              <p>Current data structures</p>
+            </div>
+          </div>
+
+          <div class="state-row">
+            <span id="structureLabel">Queue</span>
+            <strong id="structureValue">—</strong>
+          </div>
+
+          <div class="state-row">
+            <span>Visited / settled</span>
+            <strong id="visitedValue">—</strong>
+          </div>
+
+          <div class="state-row">
+            <span>Current node</span>
+            <strong id="currentValue">—</strong>
+          </div>
+
+          <div id="distancePanel" class="hidden">
+            <h3>Distance table</h3>
+            <div id="distanceTable"></div>
+          </div>
+
+          <div id="pathResult" class="path-result hidden"></div>
+        </article>
+
+      </div>
+    </div>
+
+    <div class="bottom-grid">
+      <article class="panel">
+        <h2>How this algorithm works</h2>
+        <div id="algorithmGuide"></div>
+      </article>
+
+      <article class="panel">
+        <h2>Sample graph edges</h2>
+        <div id="edgeList" class="edge-list"></div>
+
+        <p class="muted small">
+          Edge numbers represent weights. Dijkstra requires non-negative weights.
+        </p>
+      </article>
+    </div>
+
+  </section>
+
+  <!-- SAVED NOTES -->
+  <section id="notesPage" class="page">
+
+    <div class="page-heading">
+      <div>
+        <span class="eyebrow">PERSONAL REVISION SPACE</span>
+        <h1>My Notes</h1>
+        <p>
+          Write your own explanations, examples and exam revision points.
+        </p>
+      </div>
+    </div>
+
+    <div class="notes-layout">
+
+      <form id="noteForm" class="panel note-form">
+        <h2 id="noteFormTitle">Create a note</h2>
+
+        <input type="hidden" id="noteId">
+
+        <label>
+          Note title
+          <input
+            id="noteTitle"
+            type="text"
+            maxlength="100"
+            placeholder="e.g. BFS vs DFS"
+            required
+          >
+        </label>
+
+        <label>
+          Topic
+          <select id="noteTopic">
+            <option value="General">General</option>
+          </select>
+        </label>
+
+        <label>
+          Note content
+          <textarea
+            id="noteContent"
+            rows="10"
+            placeholder="Write your notes here..."
+            required
+          ></textarea>
+        </label>
+
+        <div class="form-buttons">
+          <button type="submit" class="btn primary">Save note</button>
+          <button type="button" id="cancelEditButton" class="btn secondary">Clear</button>
+        </div>
+
+        <p id="notesMessage" class="message"></p>
+      </form>
+
+      <div>
+        <div class="notes-title">
+          <h2>Saved notes</h2>
+          <span id="notesCount" class="count-badge">0</span>
+        </div>
+
+        <div id="notesList" class="notes-list"></div>
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <a href="#" class="brand" data-page="home">
+    <span class="brand-icon">A</span>
+    <span>Algo<span class="blue">Vista</span></span>
+  </a>
+
+  <p>Learn step by step. Build strong fundamentals.</p>
+  <span>DSA Learning Studio</span>
+</footer>
+
+<!-- AUTHENTICATION MODAL -->
+<div
+  id="authModal"
+  class="modal hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="authTitle"
+>
+  <div class="modal-backdrop" data-close-modal></div>
+
+  <div class="modal-card">
+
+    <button
+      id="closeAuthButton"
+      class="modal-close"
+      type="button"
+      aria-label="Close"
+    >×</button>
+
+    <span class="eyebrow">YOUR LEARNING SPACE</span>
+
+    <h2 id="authTitle">Welcome back</h2>
+    <p id="authDescription">Sign in to save and sync your notes.</p>
+
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" data-auth-mode="login">
+        Sign in
+      </button>
+
+      <button type="button" class="auth-tab" data-auth-mode="register">
+        Create account
+      </button>
+    </div>
+
+    <form id="authForm">
+
+      <label id="displayNameField" class="hidden">
+        Display name
+        <input id="displayNameInput" type="text" autocomplete="name">
+      </label>
+
+      <label>
+        Email
+        <input
+          id="emailInput"
+          type="email"
+          autocomplete="email"
+          required
+        >
+      </label>
+
+      <label for="passwordInput">Password</label>
+
+      <div class="password-wrapper">
+        <input
+          id="passwordInput"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          minlength="6"
+          required
+        >
+
+        <button
+          id="passwordToggle"
+          class="password-toggle"
+          type="button"
+          aria-label="Show password"
+          aria-pressed="false"
+          title="Show password"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+
+      <button
+        id="authSubmitButton"
+        class="btn primary full-width"
+        type="submit"
+      >Sign in</button>
+
+    </form>
+
+    <button id="forgotPasswordButton" class="text-link" type="button">
+      Forgot password?
+    </button>
+
+    <p id="authMessage" class="message" aria-live="polite"></p>
+
+    <p class="small muted">
+      Sign in or create an account to access Concepts, the Visualizer and My Notes.
+    </p>
+
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- Existing Firebase application -->
+<script type="module" src="script.js"></script>
+
+<!-- Password visibility functionality -->
+<script>
+(function () {
+  function setupPasswordToggle() {
+    const button = document.getElementById("passwordToggle");
+    const input = document.getElementById("passwordInput");
+
+    if (!button || !input) return;
+
+    button.addEventListener("click", function (event) {
+      event.preventDefault();
+
+      const showPassword = input.type === "password";
+
+      input.type = showPassword ? "text" : "password";
+
+      button.setAttribute(
+        "aria-label",
+        showPassword ? "Hide password" : "Show password"
+      );
+
+      button.setAttribute(
+        "title",
+        showPassword ? "Hide password" : "Show password"
+      );
+
+      button.setAttribute(
+        "aria-pressed",
+        showPassword ? "true" : "false"
+      );
+
+      input.focus();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupPasswordToggle);
+  } else {
+    setupPasswordToggle();
+  }
+})();
+</script>
+
+</body>
+</html>

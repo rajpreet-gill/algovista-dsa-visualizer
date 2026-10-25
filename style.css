@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
@@ -29,7 +30,10 @@ body {
   line-height: 1.65;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font: inherit;
 }
 
@@ -417,7 +421,7 @@ main {
 
 .topic-level {
   background: #f1f5f9;
-  color: #64748b;
+  color: #475569;
   padding: 5px 8px;
   border-radius: 20px;
   font-size: 9px;
@@ -1353,9 +1357,17 @@ main {
   min-width: 92px;
 }
 
-body, .topbar, .topic-card, .detail-card, .panel, .modal-card,
-input, select, textarea, button {
-  transition: background-color .22s ease, color .22s ease, border-color .22s ease;
+body,
+.topbar,
+.topic-card,
+.detail-card,
+.panel,
+.modal-card,
+input,
+select,
+textarea,
+button {
+  transition: background-color 0.22s ease, color 0.22s ease, border-color 0.22s ease;
 }
 
 body[data-theme="dark"] {
@@ -1367,7 +1379,7 @@ body[data-theme="dark"] {
   --line: #334155;
   --bg: #0b1120;
   --green: #34d399;
-  --shadow: 0 12px 34px rgba(0,0,0,.25);
+  --shadow: 0 12px 34px rgba(0, 0, 0, 0.25);
   background: var(--bg);
   color: var(--ink);
 }
@@ -1468,7 +1480,13 @@ body[data-theme="dark"] .topic-category {
 }
 
 body[data-theme="dark"] .topic-level {
-  color: #cbd5e1;
+  background: #334155;
+  color: #f8fafc !important;
+}
+
+body[data-theme="dark"] .badge {
+  background: #064e3b;
+  color: #a7f3d0 !important;
 }
 
 body[data-theme="dark"] .graph-container,
@@ -1498,3 +1516,5 @@ body[data-theme="dark"] hr {
 body[data-theme="dark"] a:not(.brand) {
   color: #93c5fd;
 }
+
+/* END OF DARK / LIGHT MODE */

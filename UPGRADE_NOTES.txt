@@ -1,0 +1,16 @@
+ALGOVISTA UPDATED FILES
+
+Replace your existing index.html, style.css and script.js with these three files. Keep all three in the same project folder.
+
+What changed:
+- Concepts and Visualizer are now available in guest mode. My Notes still requires Firebase sign-in.
+- Home page uses a practical study workspace instead of the decorative orbit illustration.
+- Concepts include category filters, topic completion status and improved topic detail layout.
+- My Notes includes search, topic/status filters, pinned notes, tags and revision status.
+- Existing Firebase Authentication, Firestore collection path, graph visualizer and DSA topic content are retained.
+
+Firebase note fields added for newly edited/saved notes: tags (array), pinned (boolean), revisionStatus (string). Existing notes continue to display; missing fields receive sensible defaults.
+
+Topic completion is stored in this browser's localStorage, not synced across devices.
+
+Run with VS Code Live Server or another local web server because Firebase uses JavaScript modules. Test sign-in, create/edit/delete notes, filters, and graph algorithms before deploying.

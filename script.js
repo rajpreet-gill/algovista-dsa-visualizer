@@ -53,12 +53,15 @@ let pendingProtectedPage = null;
 let authMode = "login";
 let notesCache = [];
 let editingNoteId = null;
+let activeTopicFilter = "All";
+let noteFilters = { search: "", topic: "All", status: "All", pinnedOnly: false };
+const completedTopics = new Set(JSON.parse(localStorage.getItem("algovista_completed_topics") || "[]"));
 
 let currentAlgorithm = "bfs";
 let algorithmSteps = [];
 let currentStepIndex = -1;
 
-const PROTECTED_PAGES = ["concepts", "visualizer", "notes"];
+const PROTECTED_PAGES = ["notes"];
 
 
 // 4. HELPER FUNCTIONS
@@ -676,6 +679,7 @@ function createTopicCard(topic) {
       </div>
       <h3>${escapeHTML(topic.title)}</h3>
       <p>${escapeHTML(topic.definition)}</p>
+      <div class="topic-card-footer"><span class="topic-progress ${completedTopics.has(topic.id) ? "is-complete" : ""}">${completedTopics.has(topic.id) ? "✓ Completed" : "Not started"}</span><span class="topic-time">${escapeHTML(topic.time.split(",")[0])}</span></div>
       <button type="button" class="btn primary"
         data-topic="${escapeHTML(topic.id)}">Learn More</button>
       <button type="button" class="btn secondary"
@@ -736,6 +740,10 @@ function renderTopics() {
       noteTopic.value = previousValue;
     }
   }
+  const noteFilterTopic = $("noteFilterTopic");
+  if (noteFilterTopic) {
+    noteFilterTopic.innerHTML = `<option value="All">All topics</option><option value="General">General</option>${topics.map(topic => `<option value="${escapeHTML(topic.title)}">${escapeHTML(topic.title)}</option>`).join("")}<option value="Graph Algorithms">Graph Algorithms</option>`;
+  }
 }
 
 function showTopic(id) {
@@ -767,17 +775,18 @@ function showTopic(id) {
     <h3>C++ Code</h3>
     <pre class="code-example"><code>${escapeHTML(topic.code)}</code></pre>
 
-    <p><strong>Time Complexity:</strong> ${escapeHTML(topic.time)}</p>
-    <p><strong>Space Complexity:</strong> ${escapeHTML(topic.space)}</p>
-
-    <h3>Applications</h3>
-    <ul>${topic.applications.map(item => `<li>${escapeHTML(item)}</li>`).join("")}</ul>
+    <div class="concept-detail-grid">
+      <section><h3>Complexity</h3><p><strong>Time:</strong> ${escapeHTML(topic.time)}</p><p><strong>Space:</strong> ${escapeHTML(topic.space)}</p></section>
+      <section><h3>Where it is used</h3><ul>${topic.applications.map(item => `<li>${escapeHTML(item)}</li>`).join("")}</ul></section>
+    </div>
 
     <h3>Practice Questions</h3>
     <ol>${topic.questions.map(item => `<li>${escapeHTML(item)}</li>`).join("")}</ol>
 
-    <button type="button" class="btn secondary"
-      data-save-topic="${escapeHTML(topic.id)}">Save to My Notes</button>
+    <div class="detail-actions">
+      <button type="button" class="btn primary" data-complete-topic="${escapeHTML(topic.id)}">${completedTopics.has(topic.id) ? "✓ Marked complete" : "Mark as completed"}</button>
+      <button type="button" class="btn secondary" data-save-topic="${escapeHTML(topic.id)}">Save to My Notes</button>
+    </div>
   `;
 
   detail.classList.remove("hidden");
@@ -791,14 +800,16 @@ function searchTopics(searchText) {
   const text = searchText.toLowerCase().trim();
 
   const filtered = topics.filter(topic =>
-    topic.title.toLowerCase().includes(text) ||
+    (activeTopicFilter === "All" || topic.category === activeTopicFilter) &&
+    (topic.title.toLowerCase().includes(text) ||
     topic.category.toLowerCase().includes(text) ||
-    topic.definition.toLowerCase().includes(text)
+    topic.definition.toLowerCase().includes(text))
   );
 
   container.innerHTML = filtered.length
     ? filtered.map(createTopicCard).join("")
-    : "<p class='muted'>No matching topics found.</p>";
+    : "<p class='muted'>No matching topics found. Try another search or category.</p>";
+  if ($("topicResultCount")) $("topicResultCount").textContent = `${filtered.length} topic${filtered.length === 1 ? "" : "s"}`;
 }
 
 
@@ -1085,13 +1096,6 @@ function renderAlgorithmGuide() {
 }
 
 function startAlgorithm() {
-  if (!auth.currentUser) {
-    pendingProtectedPage = "visualizer";
-    openAuth("login");
-    setMessage("authMessage", "Please sign in to use the visualizer.", "error");
-    return;
-  }
-
   currentAlgorithm = $("algorithmSelect")?.value || "bfs";
   const start = $("startNodeSelect")?.value || "A";
   const target = $("targetNodeSelect")?.value || "F";
@@ -1110,12 +1114,6 @@ function startAlgorithm() {
 }
 
 function nextStep() {
-  if (!auth.currentUser) {
-    pendingProtectedPage = "visualizer";
-    openAuth("login");
-    return;
-  }
-
   if (!algorithmSteps.length) {
     showToast("Click Run first.");
     return;
@@ -1386,7 +1384,7 @@ function goToPage(page) {
     return;
   }
 
-  // Protect Concepts, Visualizer, and Notes.
+  // Only personal notes require an account; learning pages are public.
   if (PROTECTED_PAGES.includes(normalizedPage) && !auth.currentUser) {
     pendingProtectedPage = normalizedPage;
     openAuth("login");
@@ -1472,62 +1470,48 @@ async function loadNotes() {
 
 function renderNotes() {
   const container = $("notesList");
-
-  if ($("notesCount")) {
-    $("notesCount").textContent = String(notesCache.length);
-  }
-
+  if ($("notesCount")) $("notesCount").textContent = String(notesCache.length);
   if (!container) return;
-
   if (!auth.currentUser) {
-    container.innerHTML = `
-      <div class="empty-state">
-        Please sign in to view your notes.
-      </div>
-    `;
+    container.innerHTML = `<div class="empty-state"><h3>Your notes are private</h3><p>Sign in to create and sync your revision notes.</p></div>`;
     return;
   }
-
+  const filtered = notesCache.filter(note => {
+    const queryText = noteFilters.search.toLowerCase();
+    const matchesSearch = !queryText || `${note.title || ""} ${note.content || ""} ${note.topic || ""} ${(Array.isArray(note.tags) ? note.tags : []).join(" ")}`.toLowerCase().includes(queryText);
+    const matchesTopic = noteFilters.topic === "All" || (note.topic || "General") === noteFilters.topic;
+    const matchesStatus = noteFilters.status === "All" || (note.revisionStatus || "Not revised") === noteFilters.status;
+    return matchesSearch && matchesTopic && matchesStatus && (!noteFilters.pinnedOnly || note.pinned);
+  }).sort((a,b) => Number(!!b.pinned)-Number(!!a.pinned));
   if (!notesCache.length) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <h3>No notes yet</h3>
-        <p>Create your first personal DSA note.</p>
-      </div>
-    `;
+    container.innerHTML = `<div class="empty-state"><h3>No notes yet</h3><p>Create your first personal DSA note. You can also save a topic directly from Concepts.</p></div>`;
     return;
   }
-
-  container.innerHTML = notesCache.map(note => `
-    <article class="note-item">
-      <div class="note-item-head">
-        <div>
-          <h3>${escapeHTML(note.title || "Untitled note")}</h3>
-          <span class="note-meta">
-            ${escapeHTML(note.topic || "General")}
-          </span>
-        </div>
-
-        <div class="note-actions">
-          <button
-            type="button"
-            class="mini-button"
-            data-edit-note="${escapeHTML(note.id)}">
-            Edit
-          </button>
-
-          <button
-            type="button"
-            class="mini-button delete"
-            data-delete-note="${escapeHTML(note.id)}">
-            Delete
-          </button>
-        </div>
-      </div>
-
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty-state"><h3>No matching notes</h3><p>Change the search text or filters to see your saved notes.</p></div>`;
+    return;
+  }
+  container.innerHTML = filtered.map(note => `
+    <article class="note-item ${note.pinned ? "note-pinned" : ""}">
+      <div class="note-item-head"><div>
+        <div class="note-title-line"><h3>${escapeHTML(note.title || "Untitled note")}</h3>${note.pinned ? `<span class="pin-label">Pinned</span>` : ""}</div>
+        <span class="note-meta">${escapeHTML(note.topic || "General")}${Array.isArray(note.tags) && note.tags.length ? ` · ${note.tags.map(escapeHTML).join(", ")}` : ""}</span>
+      </div><div class="note-actions">
+        <button type="button" class="mini-button" data-pin-note="${escapeHTML(note.id)}">${note.pinned ? "Unpin" : "Pin"}</button>
+        <button type="button" class="mini-button" data-edit-note="${escapeHTML(note.id)}">Edit</button>
+        <button type="button" class="mini-button delete" data-delete-note="${escapeHTML(note.id)}">Delete</button>
+      </div></div>
       <p class="note-content">${escapeHTML(note.content || "")}</p>
-    </article>
-  `).join("");
+      <div class="note-card-footer"><label>Revision status <select data-note-status="${escapeHTML(note.id)}"><option ${(!note.revisionStatus || note.revisionStatus === "Not revised") ? "selected" : ""}>Not revised</option><option ${note.revisionStatus === "Revising" ? "selected" : ""}>Revising</option><option ${note.revisionStatus === "Revised" ? "selected" : ""}>Revised</option></select></label><span class="note-date">${note.updatedAt?.toDate ? `Updated ${note.updatedAt.toDate().toLocaleDateString()}` : "Personal note"}</span></div>
+    </article>`).join("");
+}
+
+async function updateNoteField(id, fields) {
+  if (!auth.currentUser) return;
+  try {
+    await updateDoc(doc(db, "users", auth.currentUser.uid, "notes", id), { ...fields, updatedAt: serverTimestamp() });
+    await loadNotes();
+  } catch (error) { showToast(friendlyError(error), "error"); }
 }
 
 function resetNoteForm() {
@@ -1542,6 +1526,7 @@ function resetNoteForm() {
   if ($("noteFormTitle")) {
     $("noteFormTitle").textContent = "Create a note";
   }
+  if ($("noteTags")) $("noteTags").value = "";
 
   setMessage("notesMessage", "");
 }
@@ -1564,6 +1549,7 @@ async function saveNote(event) {
   const title = $("noteTitle")?.value.trim();
   const topic = $("noteTopic")?.value || "General";
   const content = $("noteContent")?.value.trim();
+  const tags = ($("noteTags")?.value || "").split(",").map(tag => tag.trim()).filter(Boolean).slice(0, 8);
 
   if (!title || !content) {
     setMessage(
@@ -1579,6 +1565,7 @@ async function saveNote(event) {
       title,
       topic,
       content,
+      tags,
       updatedAt: serverTimestamp()
     };
 
@@ -1598,6 +1585,8 @@ async function saveNote(event) {
     } else {
       await addDoc(getUserNotesCollection(), {
         ...data,
+        pinned: false,
+        revisionStatus: "Not revised",
         createdAt: serverTimestamp()
       });
 
@@ -1623,6 +1612,7 @@ function editNote(id) {
   if ($("noteTitle")) $("noteTitle").value = note.title || "";
   if ($("noteTopic")) $("noteTopic").value = note.topic || "General";
   if ($("noteContent")) $("noteContent").value = note.content || "";
+  if ($("noteTags")) $("noteTags").value = (note.tags || []).join(", ");
 
   if ($("noteFormTitle")) {
     $("noteFormTitle").textContent = "Edit note";
@@ -1776,6 +1766,32 @@ document.addEventListener("click", event => {
     return;
   }
 
+  const pinButton = event.target.closest("[data-pin-note]");
+  if (pinButton) {
+    const note = notesCache.find(item => item.id === pinButton.dataset.pinNote);
+    if (note) updateNoteField(note.id, { pinned: !note.pinned });
+    return;
+  }
+
+  const completeButton = event.target.closest("[data-complete-topic]");
+  if (completeButton) {
+    const id = completeButton.dataset.completeTopic;
+    completedTopics.add(id);
+    localStorage.setItem("algovista_completed_topics", JSON.stringify([...completedTopics]));
+    renderTopics();
+    showTopic(id);
+    showToast("Topic marked as completed.", "success");
+    return;
+  }
+
+  const filterButton = event.target.closest("[data-topic-filter]");
+  if (filterButton) {
+    activeTopicFilter = filterButton.dataset.topicFilter;
+    document.querySelectorAll("[data-topic-filter]").forEach(button => button.classList.toggle("active", button === filterButton));
+    searchTopics($("topicSearch")?.value || "");
+    return;
+  }
+
   const authModeButton = event.target.closest("[data-auth-mode]");
 
   if (authModeButton) {
@@ -1815,18 +1831,18 @@ $("nextButton")?.addEventListener("click", nextStep);
 $("resetButton")?.addEventListener("click", resetAlgorithm);
 
 $("algorithmSelect")?.addEventListener("change", () => {
-  if (!auth.currentUser) {
-    pendingProtectedPage = "visualizer";
-    openAuth("login");
-    return;
-  }
-
   resetAlgorithm();
   renderAlgorithmGuide();
 });
 
-$("topicSearch")?.addEventListener("input", event => {
-  searchTopics(event.target.value);
+$("topicSearch")?.addEventListener("input", event => searchTopics(event.target.value));
+$("noteSearch")?.addEventListener("input", event => { noteFilters.search = event.target.value; renderNotes(); });
+$("noteFilterTopic")?.addEventListener("change", event => { noteFilters.topic = event.target.value; renderNotes(); });
+$("noteFilterStatus")?.addEventListener("change", event => { noteFilters.status = event.target.value; renderNotes(); });
+$("pinnedOnly")?.addEventListener("change", event => { noteFilters.pinnedOnly = event.target.checked; renderNotes(); });
+document.addEventListener("change", event => {
+  const statusSelect = event.target.closest("[data-note-status]");
+  if (statusSelect) updateNoteField(statusSelect.dataset.noteStatus, { revisionStatus: statusSelect.value });
 });
 
 $("authModal")?.addEventListener("click", event => {
@@ -1935,84 +1951,3 @@ function startAlgoVista() {
 
 initializeTheme();
 startAlgoVista();
-
-// Password show/hide buttons
-document.addEventListener("click", function (event) {
-  const button = event.target.closest(".password-toggle");
-
-  if (!button) return;
-
-  const wrapper = button.closest(".password-wrapper");
-  const input = wrapper?.querySelector("input");
-
-  if (!input) return;
-
-  const showingPassword = input.type === "password";
-
-  input.type = showingPassword ? "text" : "password";
-  button.textContent = showingPassword ? "🙈" : "👁";
-  button.setAttribute(
-    "aria-label",
-    showingPassword ? "Hide password" : "Show password"
-  );
-  button.setAttribute("aria-pressed", String(showingPassword));
-});
-
-// =========================================================
-// PASSWORD SHOW / HIDE — WORKS WITH DYNAMIC LOGIN/SIGNUP FORMS
-// =========================================================
-
-document.addEventListener("click", function (event) {
-  const toggleButton = event.target.closest(
-    "#passwordToggle, #togglePasswordButton, .password-toggle"
-  );
-
-  if (!toggleButton) return;
-
-  event.preventDefault();
-
-  // Find the password input associated with this button
-  const wrapper = toggleButton.closest(".password-wrapper");
-
-  let passwordInput = wrapper
-    ? wrapper.querySelector("input")
-    : null;
-
-  // Fallback for forms that use the passwordInput ID
-  if (!passwordInput) {
-    passwordInput = document.getElementById("passwordInput");
-  }
-
-  if (!passwordInput) {
-    console.error(
-      "AlgoVista: Password input not found. Check the input ID and HTML."
-    );
-    return;
-  }
-
-  // Toggle visibility
-  const shouldShowPassword = passwordInput.type === "password";
-
-  passwordInput.type = shouldShowPassword ? "text" : "password";
-
-  // Update button accessibility labels
-  toggleButton.setAttribute(
-    "aria-label",
-    shouldShowPassword ? "Hide password" : "Show password"
-  );
-
-  toggleButton.setAttribute(
-    "title",
-    shouldShowPassword ? "Hide password" : "Show password"
-  );
-
-  toggleButton.setAttribute(
-    "aria-pressed",
-    String(shouldShowPassword)
-  );
-
-  // Update the icon if the button uses text icons
-  toggleButton.textContent = shouldShowPassword ? "🙈" : "👁️";
-});
-
-
